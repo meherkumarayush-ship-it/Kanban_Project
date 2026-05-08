@@ -1,0 +1,401 @@
+<!-- <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Collaborative Kanban Board</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+</head>
+<body>
+    <header>
+        <h1>Kanban Project</h1>
+        <div id="user-controls">
+            <button onclick="logout()">Logout</button>
+        </div>
+    </header>
+
+    <main class="board-container">
+        <div class="column">
+            <h2>To Do</h2>
+            <div class="task-list" id="list-todo" data-list-id="1">
+                {% for task in tasks %}
+                    {% if task.list_id == 1 or task.list_id == '1' %}
+                        <div class="task-card" data-id="{{ task.id }}">
+                            <div style="display: flex; justify-content: space-between;">
+                                <h4>{{ task.title }}</h4>
+                                <button onclick="deleteTask({{ task.id }})" style="border:none; background:none; color:red; cursor:pointer; font-weight:bold;">×</button>
+                            </div>
+                            <p>{{ task.description }}</p>
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+            <button class="add-task-btn" onclick="showTaskPrompt(1)">+ Add Task</button>
+        </div>
+
+        <div class="column">
+            <h2>In Progress</h2>
+            <div class="task-list" id="list-inprogress" data-list-id="2">
+                {% for task in tasks %}
+                    {% if task.list_id == 2 or task.list_id == '2' %}
+                        <div class="task-card" data-id="{{ task.id }}">
+                            <div style="display: flex; justify-content: space-between;">
+                                <h4>{{ task.title }}</h4>
+                                <button onclick="deleteTask({{ task.id }})" style="border:none; background:none; color:red; cursor:pointer; font-weight:bold;">×</button>
+                            </div>
+                            <p>{{ task.description }}</p>
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+            <button class="add-task-btn" onclick="showTaskPrompt(2)">+ Add Task</button>
+        </div>
+
+        <div class="column">
+            <h2>Done</h2>
+            <div class="task-list" id="list-done" data-list-id="3">
+                {% for task in tasks %}
+                    {% if task.list_id == 3 or task.list_id == '3' %}
+                        <div class="task-card" data-id="{{ task.id }}">
+                            <div style="display: flex; justify-content: space-between;">
+                                <h4>{{ task.title }}</h4>
+                                <button onclick="deleteTask({{ task.id }})" style="border:none; background:none; color:red; cursor:pointer; font-weight:bold;">×</button>
+                            </div>
+                            <p>{{ task.description }}</p>
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+            <button class="add-task-btn" onclick="showTaskPrompt(3)">+ Add Task</button>
+        </div>
+    </main>
+
+    <script src="{{ url_for('static', filename='js/socket.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/board.js') }}"></script>
+    <script>
+        function showTaskPrompt(listId) {
+            const title = prompt("Enter task title:");
+            if (title) {
+                createTask(listId, title);
+            }
+        }
+        
+        function logout() {
+            localStorage.removeItem('access_token');
+            window.location.href = '/login';
+        }
+
+        async function deleteTask(taskId) {
+            if (!confirm("Are you sure you want to delete this task?")) return;
+
+            const token = localStorage.getItem('access_token');
+            const res = await fetch(`/tasks/${taskId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            if (res.ok) {
+                // Remove the card from the screen immediately
+                const card = document.querySelector(`.task-card[data-id="${taskId}"]`);
+                if (card) card.remove();
+            } else {
+                alert("Failed to delete task.");
+            }
+        }
+    </script>
+
+    <script>
+    // Redirect to register if not logged in
+    if (!localStorage.getItem('access_token')) {
+        window.location.href = '/';
+    }
+    </script>
+
+</body>
+</html> -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Collaborative Kanban Board</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+    <style>
+        :root {
+            --bg-gradient: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            --todo-accent: #ff9f43;
+            --inprogress-accent: #54a0ff;
+            --done-accent: #1dd1a1;
+            --card-bg: #ffffff;
+            --header-height: 70px;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-gradient);
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        header {
+            height: var(--header-height);
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 40px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            z-index: 100;
+        }
+
+        header h1 {
+            font-size: 24px;
+            color: #2d3436;
+            margin: 0;
+        }
+
+        .logout-btn {
+            background: #ff7675;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: 0.3s;
+        }
+
+        .logout-btn:hover { background: #d63031; }
+
+        .board-container {
+            display: flex;
+            padding: 30px;
+            gap: 25px;
+            flex: 1;
+            overflow-x: auto;
+            align-items: flex-start;
+        }
+
+        .column {
+            background: rgba(255, 255, 255, 0.5);
+            min-width: 320px;
+            width: 320px;
+            border-radius: 15px;
+            display: flex;
+            flex-direction: column;
+            max-height: 100%;
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+
+        .column-header {
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .column-header h2 {
+            font-size: 18px;
+            margin: 0;
+            color: #2d3436;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Column Specific Accents */
+        #list-todo-header { border-top: 5px solid var(--todo-accent); }
+        #list-inprogress-header { border-top: 5px solid var(--inprogress-accent); }
+        #list-done-header { border-top: 5px solid var(--done-accent); }
+
+        .task-list {
+            padding: 0 15px 15px 15px;
+            flex-grow: 1;
+            overflow-y: auto;
+            min-height: 100px;
+        }
+
+        .task-card {
+            background: var(--card-bg);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 12px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+            cursor: grab;
+            transition: transform 0.2s, box-shadow 0.2s;
+            border: 1px solid transparent;
+        }
+
+        .task-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            border-color: #eee;
+        }
+
+        .task-card h4 {
+            margin: 0 0 8px 0;
+            color: #2d3436;
+            font-size: 16px;
+        }
+
+        .task-card p {
+            margin: 0;
+            color: #636e72;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .delete-btn {
+            color: #b2bec3;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            transition: 0.2s;
+        }
+
+        .delete-btn:hover { color: #ff7675; }
+
+        .add-task-btn {
+            margin: 15px;
+            background: white;
+            border: 2px dashed #b2bec3;
+            color: #636e72;
+            padding: 12px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: 0.3s;
+        }
+
+        .add-task-btn:hover {
+            border-color: var(--inprogress-accent);
+            color: var(--inprogress-accent);
+            background: #f1f8ff;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1><i class="fas fa-columns" style="color: var(--inprogress-accent);"></i> Kanban Flow</h1>
+        <div id="user-controls">
+            <button class="logout-btn" onclick="logout()">Logout</button>
+        </div>
+    </header>
+
+    <main class="board-container">
+        <div class="column">
+            <div class="column-header" id="list-todo-header">
+                <h2><i class="fas fa-circle" style="color: var(--todo-accent); font-size: 10px;"></i> To Do</h2>
+            </div>
+            <div class="task-list" id="list-todo" data-list-id="1">
+                {% for task in tasks %}
+                    {% if task.list_id == 1 or task.list_id == '1' %}
+                        <div class="task-card" data-id="{{ task.id }}">
+                            <div class="card-header">
+                                <h4>{{ task.title }}</h4>
+                                <button class="delete-btn" onclick="deleteTask({{ task.id }})"><i class="fas fa-times"></i></button>
+                            </div>
+                            <p>{{ task.description }}</p>
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+            <button class="add-task-btn" onclick="showTaskPrompt(1)"><i class="fas fa-plus"></i> Add New Task</button>
+        </div>
+
+        <div class="column">
+            <div class="column-header" id="list-inprogress-header">
+                <h2><i class="fas fa-circle" style="color: var(--inprogress-accent); font-size: 10px;"></i> In Progress</h2>
+            </div>
+            <div class="task-list" id="list-inprogress" data-list-id="2">
+                {% for task in tasks %}
+                    {% if task.list_id == 2 or task.list_id == '2' %}
+                        <div class="task-card" data-id="{{ task.id }}">
+                            <div class="card-header">
+                                <h4>{{ task.title }}</h4>
+                                <button class="delete-btn" onclick="deleteTask({{ task.id }})"><i class="fas fa-times"></i></button>
+                            </div>
+                            <p>{{ task.description }}</p>
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+            <button class="add-task-btn" onclick="showTaskPrompt(2)"><i class="fas fa-plus"></i> Add New Task</button>
+        </div>
+
+        <div class="column">
+            <div class="column-header" id="list-done-header">
+                <h2><i class="fas fa-circle" style="color: var(--done-accent); font-size: 10px;"></i> Done</h2>
+            </div>
+            <div class="task-list" id="list-done" data-list-id="3">
+                {% for task in tasks %}
+                    {% if task.list_id == 3 or task.list_id == '3' %}
+                        <div class="task-card" data-id="{{ task.id }}">
+                            <div class="card-header">
+                                <h4>{{ task.title }}</h4>
+                                <button class="delete-btn" onclick="deleteTask({{ task.id }})"><i class="fas fa-times"></i></button>
+                            </div>
+                            <p>{{ task.description }}</p>
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+            <button class="add-task-btn" onclick="showTaskPrompt(3)"><i class="fas fa-plus"></i> Add New Task</button>
+        </div>
+    </main>
+
+    <script src="{{ url_for('static', filename='js/socket.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/board.js') }}"></script>
+    <script>
+        // Redirect if not logged in
+        if (!localStorage.getItem('access_token')) {
+            window.location.href = '/login';
+        }
+
+        function showTaskPrompt(listId) {
+            const title = prompt("Enter task title:");
+            if (title) {
+                // You can add a prompt for description here too if you want!
+                createTask(listId, title);
+            }
+        }
+        
+        async function deleteTask(taskId) {
+            if (!confirm("Remove this task?")) return;
+            const token = localStorage.getItem('access_token');
+            const res = await fetch(`/tasks/${taskId}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (res.ok) {
+                const card = document.querySelector(`.task-card[data-id="${taskId}"]`);
+                if (card) card.remove();
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('access_token');
+            window.location.href = '/login';
+        }
+    </script>
+</body>
+</html>

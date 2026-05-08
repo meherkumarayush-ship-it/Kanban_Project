@@ -1,0 +1,102 @@
+/* General Layout */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f4f5f7;
+    margin: 0;
+    padding: 0;
+}
+
+header {
+    background-color: #0747a6;
+    color: white;
+    padding: 10px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* Kanban Board Container [cite: 31-33] */
+.board-container {
+    display: flex;
+    align-items: flex-start;
+    padding: 20px;
+    gap: 20px;
+    overflow-x: auto; /* Allows horizontal scrolling if many columns exist */
+    height: calc(100vh - 100px);
+}
+
+/* Column Styling [cite: 13-16, 31-34] */
+.column {
+    background-color: #ebecf0;
+    border-radius: 8px;
+    width: 300px;
+    min-width: 300px;
+    max-height: 100%;
+    display: flex;
+    flex-direction: column;
+    padding: 10px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+}
+
+.column h2 {
+    font-size: 1.1rem;
+    padding: 5px 10px;
+    color: #172b4d;
+}
+
+/* Task List Area (The Drop Zone)  */
+.task-list {
+    flex-grow: 1;
+    min-height: 50px; /* Ensures you can drop into an empty list */
+    padding: 5px;
+}
+
+/* Individual Task Cards  */
+.task-card {
+    background-color: white;
+    border-radius: 4px;
+    padding: 12px;
+    margin-bottom: 8px;
+    box-shadow: 0 1px 0 rgba(9, 30, 66, .25);
+    cursor: grab;
+    transition: background-color 0.2s ease;
+}
+
+.task-card:hover {
+    background-color: #f4f5f7;
+}
+
+.task-card h4 {
+    margin: 0 0 5px 0;
+    font-size: 0.95rem;
+    color: #172b4d;
+}
+
+.task-card p {
+    margin: 0;
+    font-size: 0.85rem;
+    color: #5e6c84;
+}
+
+/* Drag & Drop Visual Feedback  */
+.blue-background-class {
+    background-color: #c1daff !important;
+    border: 2px dashed #0747a6;
+}
+
+/* Buttons */
+.add-task-btn {
+    background: transparent;
+    border: none;
+    color: #5e6c84;
+    text-align: left;
+    padding: 10px;
+    cursor: pointer;
+    border-radius: 4px;
+    font-size: 0.9rem;
+}
+
+.add-task-btn:hover {
+    background-color: #dadbe2;
+    color: #172b4d;
+}

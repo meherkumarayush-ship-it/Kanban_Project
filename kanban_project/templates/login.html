@@ -1,0 +1,197 @@
+<!-- <!DOCTYPE html>
+<html>
+<head>
+    <title>Login</title>
+</head>
+<body>
+    <h2>Login to Kanban</h2>
+    <input type="text" id="username" placeholder="Username">
+    <input type="password" id="password" placeholder="Password">
+    <button onclick="authLogin()">Login</button>
+
+    <script>
+        async function authLogin() {
+            const user = document.getElementById('username').value;
+            const pass = document.getElementById('password').value;
+            
+            const res = await fetch('/auth/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username: user, password: pass })
+            });
+
+            const data = await res.json();
+            if (res.ok) {
+                // This stores the token so "Add Task" works!
+                localStorage.setItem('access_token', data.access_token);
+                window.location.href = '/board';
+            } else {
+                alert("Login Failed");
+            }
+        }
+    </script>
+</body>
+</html> -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Kanban Project</title>
+    <style>
+        :root {
+            --primary-color: #4a90e2;
+            --secondary-color: #f4f7f6;
+            --text-color: #333;
+            --accent-color: #50e3c2;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .login-container {
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        h2 {
+            margin-bottom: 10px;
+            color: var(--text-color);
+            font-weight: 600;
+        }
+
+        p {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 25px;
+        }
+
+        .input-group {
+            text-align: left;
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            font-size: 14px;
+            margin-bottom: 5px;
+            color: #555;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            box-sizing: border-box; /* Important for width */
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.3s, transform 0.2s;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            background-color: #357abd;
+            transform: translateY(-1px);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .footer-links {
+            margin-top: 20px;
+            font-size: 14px;
+        }
+
+        .footer-links a {
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+
+        .footer-links a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="login-container">
+        <h2>Welcome Back</h2>
+        <p>Login to manage your Kanban tasks</p>
+        
+        <div class="input-group">
+            <label for="username">Username</label>
+            <input type="text" id="username" placeholder="Enter your username">
+        </div>
+
+        <div class="input-group">
+            <label for="password">Password</label>
+            <input type="password" id="password" placeholder="Enter your password">
+        </div>
+
+        <button onclick="authLogin()">Sign In</button>
+
+        <div class="footer-links">
+            Don't have an account? <a href="/">Create one here</a>
+        </div>
+    </div>
+
+    <script>
+        async function authLogin() {
+            const user = document.getElementById('username').value;
+            const pass = document.getElementById('password').value;
+
+            if(!user || !pass) {
+                alert("Please fill in all fields");
+                return;
+            }
+            
+            const res = await fetch('/auth/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username: user, password: pass })
+            });
+
+            const data = await res.json();
+            if (res.ok) {
+                localStorage.setItem('access_token', data.access_token);
+                // Redirects to your board route
+                window.location.href = '/board'; 
+            } else {
+                alert("Invalid username or password");
+            }
+        }
+    </script>
+</body>
+</html>
